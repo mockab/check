@@ -1,0 +1,73 @@
+#!/bin/bash
+
+#  CPO500 Assignment 2 configuration check
+#  Written by: Peter Callaghan
+#  Last Modified: 06 Apr '21
+#  This script runs a series of commands to determine if you have complete the tasks
+#  in assignment 2.  It will create a text file in your home directory called a2.submission.
+#  Note:  This command must be run using sudo.
+
+
+dir=/home/student/assignment2
+output=/home/student/a2.submission
+
+date &> $output
+hostname &>> $output
+ls -ilR $dir &>> $output
+
+for file in `find $dir -type f ! -name '*.tar' ! -name 'tarchive'`
+do
+  if [ -f $file ]
+  then
+    echo $file &>> $output
+    cat $file &>> $output
+    echo "" &>> $output
+  fi
+done
+
+echo CONFIG &>> $output
+grep home /etc/passwd &>> $output
+echo "" &>> $output
+cat /etc/shadow &>> $output
+echo "" &>> $output
+cat /etc/group &>> $output
+echo "" &>> $output
+cat /etc/login.defs &>> $output
+echo "" &>> $output
+ls -l /etc/sudoers.d &>> $output
+for each in `ls /etc/sudoers.d`
+do
+	echo /etc/sudoers.d/$each &>> $output
+	cat /etc/sudoers.d/$each &>> $output
+	echo "" &>> $output
+done
+echo "" &>> $output
+ls -l /etc/rsyslog.d &>> $output
+echo "" &>> $output
+for each in `ls /etc/rsyslog.d`
+do
+	echo /etc/rsyslog.d/$each &>> $output 
+	cat /etc/rsyslog.d/$each &>> $output
+	echo "" &>> $output
+done
+timedatectl &>> $output
+echo "" &>> $output
+cat /etc/ssh/sshd_config &>> $output
+echo "" &>> $output
+echo "AUTHORIZED KEYS" &>> $output
+for account in `ls /home`
+do
+	echo $account &>> $output
+	if [ -f /home/$account/.ssh/authorized_keys ]
+	then
+		cat /home/$account/.ssh/authorized_keys &>> $output
+	fi
+	echo ""
+done
+ls -l /etc/sysconfig/network-scripts &>> $output
+for each in `ls /etc/sysconfig/network-scripts`
+do
+	cat /etc/sysconfig/network-scripts/$each &>> $output
+done
+nmcli dev status &>> $output
+nmcli con show &>> $output
